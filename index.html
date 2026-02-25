@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Swade.ca — Solutions with a Dynamic Edge</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#050508;
+  --surface:#0C0C14;
+  --surface2:#12121E;
+  --border:#1E1E32;
+  --text:#F0F0FF;
+  --sub:#8888AA;
+  --muted:#44445A;
+  --cyan:#00E5FF;
+  --cyan2:#00B4CC;
+  --green:#00FF94;
+  --orange:#FF6B35;
+  --glow-cyan:rgba(0,229,255,0.15);
+  --glow-green:rgba(0,255,148,0.12);
+}
+
+html{scroll-behavior:smooth}
+body{
+  font-family:'DM Sans',sans-serif;
+  background:var(--bg);color:var(--text);
+  overflow-x:hidden;cursor:none;
+}
+
+/* ── CUSTOM CURSOR ── */
+.cursor{position:fixed;pointer-events:none;z-index:9999;mix-blend-mode:difference}
+.cursor-dot{width:8px;height:8px;background:#fff;border-radius:50%;transform:translate(-50%,-50%);transition:width .2s,height .2s}
+.cursor-ring{width:40px;height:40px;border:1px solid rgba(0,229,255,0.6);border-radius:50%;transform:translate(-50%,-50%);transition:all .12s ease;position:absolute;top:0;left:0}
+body:hover .cursor-dot{width:6px;height:6px}
+
+/* ── NOISE OVERLAY ── */
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:1;opacity:.4;
+}
+
+/* ── NAV ── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  padding:20px 48px;
+  display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid transparent;
+  transition:.4s;
+}
+nav.scrolled{
+  background:rgba(5,5,8,.85);backdrop-filter:blur(20px);
+  border-color:var(--border);
+}
+.nav-logo{
+  font-family:'Syne',sans-serif;font-size:22px;font-weight:800;
+  background:linear-gradient(90deg,var(--cyan),var(--green));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  letter-spacing:-0.5px;
+}
+.nav-links{display:flex;gap:32px;align-items:center}
+.nav-links a{
+  font-size:13px;font-weight:500;color:var(--sub);text-decoration:none;
+  transition:.2s;letter-spacing:.5px;text-transform:uppercase;
+}
+.nav-links a:hover{color:var(--cyan)}
+.nav-cta{
+  padding:9px 22px;background:transparent;border:1px solid var(--cyan);
+  color:var(--cyan)!important;border-radius:6px;
+  transition:.2s!important;font-size:13px!important;
+}
+.nav-cta:hover{background:var(--cyan)!important;color:var(--bg)!important}
+
+/* ── HERO ── */
+.hero{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  position:relative;overflow:hidden;padding:120px 48px 80px;
+}
+
+/* Animated grid background */
+.hero-grid{
+  position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px);
+  background-size:60px 60px;
+  mask-image:radial-gradient(ellipse 80% 80% at 50% 50%, black, transparent);
+}
+
+/* Glow orbs */
+.orb{position:absolute;border-radius:50%;filter:blur(80px);animation:float 8s ease-in-out infinite}
+.orb-1{width:600px;height:600px;background:radial-gradient(circle,rgba(0,229,255,0.08),transparent 70%);top:-200px;right:-100px;animation-delay:0s}
+.orb-2{width:400px;height:400px;background:radial-gradient(circle,rgba(0,255,148,0.06),transparent 70%);bottom:-100px;left:-100px;animation-delay:-3s}
+.orb-3{width:300px;height:300px;background:radial-gradient(circle,rgba(255,107,53,0.05),transparent 70%);top:40%;left:30%;animation-delay:-5s}
+@keyframes float{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-30px) scale(1.05)}}
+
+.hero-content{position:relative;z-index:2;text-align:center;max-width:900px}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(0,229,255,0.08);border:1px solid rgba(0,229,255,0.2);
+  border-radius:30px;padding:6px 16px;margin-bottom:32px;
+  font-size:12px;font-weight:500;color:var(--cyan);letter-spacing:1px;text-transform:uppercase;
+  animation:fadeUp .8s ease both;
+}
+.hero-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--cyan);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+.hero-title{
+  font-family:'Syne',sans-serif;font-size:clamp(52px,8vw,96px);
+  font-weight:800;line-height:.95;letter-spacing:-3px;
+  margin-bottom:24px;
+  animation:fadeUp .8s ease .1s both;
+}
+.hero-title span{
+  background:linear-gradient(135deg,var(--cyan) 0%,var(--green) 50%,var(--cyan) 100%);
+  background-size:200%;
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  animation:shimmer 4s linear infinite;
+}
+@keyframes shimmer{0%{background-position:0%}100%{background-position:200%}}
+
+.hero-sub{
+  font-size:clamp(16px,2vw,20px);color:var(--sub);line-height:1.7;
+  max-width:600px;margin:0 auto 48px;font-weight:300;
+  animation:fadeUp .8s ease .2s both;
+}
+
+.hero-actions{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;animation:fadeUp .8s ease .3s both}
+.btn-primary{
+  padding:16px 36px;background:linear-gradient(135deg,var(--cyan),var(--cyan2));
+  color:var(--bg);border:none;border-radius:8px;font-family:'DM Sans',sans-serif;
+  font-size:15px;font-weight:700;cursor:pointer;transition:.3s;text-decoration:none;
+  display:inline-flex;align-items:center;gap:8px;
+  box-shadow:0 0 30px rgba(0,229,255,0.3);
+}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 0 50px rgba(0,229,255,0.5)}
+.btn-secondary{
+  padding:16px 36px;background:transparent;
+  color:var(--text);border:1px solid var(--border);border-radius:8px;
+  font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;
+  cursor:pointer;transition:.3s;text-decoration:none;
+  display:inline-flex;align-items:center;gap:8px;
+}
+.btn-secondary:hover{border-color:var(--cyan);color:var(--cyan);transform:translateY(-2px)}
+
+/* Live presence preview in hero */
+.hero-preview{
+  margin-top:72px;position:relative;
+  animation:fadeUp .8s ease .5s both;
+}
+.preview-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:16px;text-align:center}
+.preview-window{
+  background:var(--surface);border:1px solid var(--border);border-radius:16px;
+  overflow:hidden;max-width:760px;margin:0 auto;
+  box-shadow:0 0 60px rgba(0,229,255,0.08), 0 40px 80px rgba(0,0,0,.6);
+}
+.preview-bar{
+  background:var(--surface2);padding:10px 16px;
+  display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);
+}
+.preview-dots{display:flex;gap:6px}
+.preview-dot{width:10px;height:10px;border-radius:50%}
+.preview-url{flex:1;text-align:center;font-size:11px;color:var(--muted);background:var(--bg);border-radius:4px;padding:3px 12px}
+.preview-content{padding:20px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.preview-card{
+  background:var(--surface2);border:1px solid var(--border);border-radius:10px;
+  padding:12px 14px;display:flex;align-items:flex-start;gap:10px;
+  transition:.3s;position:relative;
+}
+.preview-card:hover{border-color:var(--cyan);transform:translateY(-2px)}
+.preview-avatar{
+  width:40px;height:40px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:700;color:#fff;flex-shrink:0;position:relative;
+}
+.preview-pdot{
+  position:absolute;bottom:1px;right:1px;width:11px;height:11px;
+  border-radius:50%;border:2px solid var(--surface2);
+}
+.preview-loc{
+  position:absolute;top:8px;right:10px;
+  font-size:9px;font-weight:700;padding:2px 6px;border-radius:20px;
+}
+.preview-loc.office{background:rgba(63,185,80,.15);color:#3FB950}
+.preview-loc.remote{background:rgba(0,120,212,.15);color:#58a6ff}
+.preview-info{min-width:0;flex:1}
+.preview-name{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.preview-title{font-size:10px;color:var(--sub);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.preview-upn{font-size:10px;color:var(--muted);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.preview-phone{font-size:10px;color:var(--muted);margin-top:1px}
+.preview-status{font-size:10px;margin-top:4px;font-weight:600}
+.preview-msg{font-size:9px;color:var(--sub);margin-top:3px;font-style:italic;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.preview-ooo{font-size:9px;background:rgba(248,208,42,.1);border:1px solid rgba(248,208,42,.2);border-radius:4px;padding:2px 6px;margin-top:3px;color:#D29922;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── SECTION COMMON ── */
+section{padding:120px 48px;position:relative}
+.section-label{
+  font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;
+  color:var(--cyan);margin-bottom:16px;
+}
+.section-title{
+  font-family:'Syne',sans-serif;font-size:clamp(36px,5vw,56px);
+  font-weight:800;letter-spacing:-2px;line-height:1.1;margin-bottom:20px;
+}
+.section-sub{font-size:17px;color:var(--sub);line-height:1.7;font-weight:300;max-width:560px}
+
+/* ── PRODUCTS ── */
+#products{background:var(--surface)}
+.products-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:2px;margin-top:72px;border:2px solid var(--border);border-radius:16px;overflow:hidden;
+}
+.product-card{
+  background:var(--bg);padding:40px 36px;
+  border-right:1px solid var(--border);
+  position:relative;overflow:hidden;transition:.3s;
+  cursor:default;
+}
+.product-card:last-child{border-right:none}
+.product-card::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 60% 60% at 50% 0%, var(--glow-cyan), transparent);
+  opacity:0;transition:.4s;
+}
+.product-card:hover::before{opacity:1}
+.product-card:hover{background:var(--surface2)}
+.product-icon{
+  width:52px;height:52px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:24px;margin-bottom:24px;position:relative;z-index:1;
+}
+.product-icon.cyan{background:rgba(0,229,255,0.1);border:1px solid rgba(0,229,255,0.2)}
+.product-icon.green{background:rgba(0,255,148,0.1);border:1px solid rgba(0,255,148,0.2)}
+.product-icon.orange{background:rgba(255,107,53,0.1);border:1px solid rgba(255,107,53,0.2)}
+.product-icon.purple{background:rgba(138,99,210,0.1);border:1px solid rgba(138,99,210,0.2)}
+.product-name{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;margin-bottom:10px;position:relative;z-index:1}
+.product-desc{font-size:14px;color:var(--sub);line-height:1.7;position:relative;z-index:1}
+.product-features{margin-top:20px;display:flex;flex-direction:column;gap:8px;position:relative;z-index:1}
+.product-feature{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:8px}
+.product-feature::before{content:'→';color:var(--cyan);font-size:11px}
+
+/* ── HOW IT WORKS ── */
+#how{background:var(--bg)}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:0;margin-top:72px;position:relative}
+.steps::before{
+  content:'';position:absolute;top:32px;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--border),var(--border),transparent);
+}
+.step{padding:0 32px;position:relative;z-index:1}
+.step-num{
+  width:64px;height:64px;border-radius:50%;
+  background:var(--surface2);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Syne',sans-serif;font-size:22px;font-weight:800;
+  color:var(--cyan);margin-bottom:24px;
+  transition:.3s;
+}
+.step:hover .step-num{background:var(--cyan);color:var(--bg);border-color:var(--cyan);box-shadow:0 0 30px rgba(0,229,255,0.4)}
+.step-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;margin-bottom:10px}
+.step-desc{font-size:14px;color:var(--sub);line-height:1.7}
+
+/* ── TV DEMO ── */
+#tv-demo{
+  background:var(--surface);
+  display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;
+}
+.tv-mockup{
+  position:relative;
+  background:var(--bg);border:2px solid var(--border);border-radius:16px;
+  padding:24px;
+  box-shadow:0 0 80px rgba(0,229,255,0.1);
+}
+.tv-mockup::before{
+  content:'';position:absolute;inset:-1px;border-radius:17px;
+  background:linear-gradient(135deg,var(--cyan),transparent,var(--green));
+  z-index:-1;opacity:.3;
+}
+.tv-top{
+  display:flex;justify-content:space-between;align-items:center;
+  background:var(--surface2);border-radius:8px;padding:10px 14px;margin-bottom:14px;
+}
+.tv-stat{text-align:center}
+.tv-stat-num{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;line-height:1}
+.tv-stat-num.green{color:var(--green)}
+.tv-stat-num.red{color:#F85149}
+.tv-stat-num.yellow{color:#D29922}
+.tv-stat-label{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:2px}
+.tv-dept-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:800;margin-bottom:12px;color:var(--cyan)}
+.tv-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.tv-card{
+  background:var(--surface2);border:1px solid var(--border);border-radius:8px;
+  padding:10px;text-align:center;
+}
+.tv-av{width:32px;height:32px;border-radius:50%;margin:0 auto 6px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;position:relative}
+.tv-av-ring{position:absolute;inset:-2px;border-radius:50%;border:2px solid}
+.tv-card-name{font-size:9px;font-weight:600;margin-bottom:3px}
+.tv-card-status{font-size:8px;font-weight:700;padding:1px 6px;border-radius:10px}
+.tv-card-status.green{background:rgba(63,185,80,.15);color:#3FB950}
+.tv-card-status.red{background:rgba(248,81,73,.15);color:#F85149}
+.tv-progress{height:2px;background:var(--surface2);border-radius:1px;margin-top:12px;overflow:hidden}
+.tv-progress-fill{height:100%;background:linear-gradient(90deg,var(--cyan),var(--green));border-radius:1px;animation:progress-demo 4s linear infinite}
+@keyframes progress-demo{0%{width:0%}100%{width:100%}}
+.tv-ticker{
+  margin-top:10px;background:var(--surface2);border-radius:6px;
+  padding:6px 12px;font-size:9px;color:var(--sub);overflow:hidden;white-space:nowrap;
+}
+.tv-ticker-inner{animation:ticker-demo 8s linear infinite}
+@keyframes ticker-demo{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+/* ── CONTACT ── */
+#contact{background:var(--bg)}
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start;margin-top:72px}
+.contact-info h3{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;margin-bottom:16px}
+.contact-info p{font-size:15px;color:var(--sub);line-height:1.7;margin-bottom:32px}
+.contact-detail{display:flex;align-items:center;gap:12px;margin-bottom:16px;color:var(--sub);font-size:14px}
+.contact-detail-icon{width:36px;height:36px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+
+.contact-form{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:40px}
+.form-group{margin-bottom:20px}
+.form-label{display:block;font-size:12px;font-weight:600;color:var(--sub);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px}
+.form-input,.form-select,.form-textarea{
+  width:100%;padding:12px 16px;background:var(--surface2);
+  border:1px solid var(--border);border-radius:8px;
+  font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);
+  outline:none;transition:.2s;
+}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(0,229,255,0.08)}
+.form-input::placeholder,.form-textarea::placeholder{color:var(--muted)}
+.form-select{appearance:none;cursor:pointer}
+.form-select option{background:var(--surface2)}
+.form-textarea{resize:vertical;min-height:100px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.btn-submit{
+  width:100%;padding:14px;
+  background:linear-gradient(135deg,var(--cyan),var(--cyan2));
+  color:var(--bg);border:none;border-radius:8px;
+  font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;
+  cursor:pointer;transition:.3s;
+  box-shadow:0 0 30px rgba(0,229,255,0.2);
+}
+.btn-submit:hover{transform:translateY(-1px);box-shadow:0 0 50px rgba(0,229,255,0.4)}
+.form-success{
+  display:none;text-align:center;padding:40px 20px;
+}
+.form-success-icon{font-size:48px;margin-bottom:16px}
+.form-success h3{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;margin-bottom:8px;color:var(--green)}
+.form-success p{color:var(--sub);font-size:14px}
+
+/* ── FOOTER ── */
+footer{
+  border-top:1px solid var(--border);padding:40px 48px;
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--surface);
+}
+.footer-logo{
+  font-family:'Syne',sans-serif;font-size:18px;font-weight:800;
+  background:linear-gradient(90deg,var(--cyan),var(--green));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.footer-copy{font-size:13px;color:var(--muted)}
+
+/* ── SCROLL REVEAL ── */
+.reveal{opacity:0;transform:translateY(30px);transition:opacity .7s ease,transform .7s ease}
+.reveal.visible{opacity:1;transform:translateY(0)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  nav{padding:16px 24px}
+  .nav-links{display:none}
+  section{padding:80px 24px}
+  #tv-demo,#contact .contact-grid{grid-template-columns:1fr}
+  .preview-content{grid-template-columns:1fr 1fr}
+  .tv-cards{grid-template-columns:repeat(3,1fr)}
+  footer{flex-direction:column;gap:16px;text-align:center;padding:32px 24px}
+  .steps::before{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- Custom cursor -->
+<div class="cursor" id="cursor">
+  <div class="cursor-dot" id="cursor-dot"></div>
+  <div class="cursor-ring" id="cursor-ring"></div>
+</div>
+
+<!-- NAV -->
+<nav id="nav">
+  <div class="nav-logo">swade.ca</div>
+  <div class="nav-links">
+    <a href="#products">Products</a>
+    <a href="#how">How it works</a>
+    <a href="#tv-demo">TV Display</a>
+    <a href="#contact" class="nav-cta">Get a Demo</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <div class="hero-content">
+    <div class="hero-badge">● Live Microsoft Teams Solutions</div>
+    <h1 class="hero-title">See Your Team.<br><span>In Real Time.</span></h1>
+    <p class="hero-sub">Live presence, smarter visibility, zero friction. Microsoft 365 solutions built for teams that move fast.</p>
+    <div class="hero-actions">
+      <a href="#contact" class="btn-primary">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        Request a Demo
+      </a>
+      <a href="#products" class="btn-secondary">See all products</a>
+    </div>
+
+    <div class="hero-preview">
+      <div class="preview-label">Live preview · Teams Presence App</div>
+      <div class="preview-window">
+        <div class="preview-bar">
+          <div class="preview-dots">
+            <div class="preview-dot" style="background:#FF5F57"></div>
+            <div class="preview-dot" style="background:#FFBD2E"></div>
+            <div class="preview-dot" style="background:#28C840"></div>
+          </div>
+          <div class="preview-url">MultiHat Solutions Teams Presence</div>
+        </div>
+        <div class="preview-content">
+          <div class="preview-card">
+            <div class="preview-loc remote">🏠 Remote</div>
+            <div class="preview-avatar" style="background:#0078D4">SM<div class="preview-pdot" style="background:#3FB950"></div></div>
+            <div class="preview-info">
+              <div class="preview-name">Sarah Mitchell</div>
+              <div class="preview-title">Senior Developer</div>
+              <div class="preview-upn">s.mitchell@company.com</div>
+              <div class="preview-phone">📞 +1 604 555 0192</div>
+              <div class="preview-status" style="color:#3FB950">● Available</div>
+              <div class="preview-msg">💬 Working from home today</div>
+            </div>
+          </div>
+          <div class="preview-card">
+            <div class="preview-loc office">🏢 Office</div>
+            <div class="preview-avatar" style="background:#C4314B">JT<div class="preview-pdot" style="background:#F85149"></div></div>
+            <div class="preview-info">
+              <div class="preview-name">James Thornton</div>
+              <div class="preview-title">Solutions Architect</div>
+              <div class="preview-upn">j.thornton@company.com</div>
+              <div class="preview-phone">📞 +1 604 555 0148</div>
+              <div class="preview-status" style="color:#F85149">📞 In a Call</div>
+            </div>
+          </div>
+          <div class="preview-card">
+            <div class="preview-avatar" style="background:#107C41">AP<div class="preview-pdot" style="background:#3FB950"></div></div>
+            <div class="preview-info">
+              <div class="preview-name">Aisha Patel</div>
+              <div class="preview-title">Product Manager</div>
+              <div class="preview-upn">a.patel@company.com</div>
+              <div class="preview-phone">📞 +1 604 555 0231</div>
+              <div class="preview-status" style="color:#3FB950">● Available</div>
+            </div>
+          </div>
+          <div class="preview-card">
+            <div class="preview-avatar" style="background:#8764B8">EW<div class="preview-pdot" style="background:#F85149"></div></div>
+            <div class="preview-info">
+              <div class="preview-name">Emma Watson</div>
+              <div class="preview-title">Head of Design</div>
+              <div class="preview-upn">e.watson@company.com</div>
+              <div class="preview-status" style="color:#F85149">⛔ Do Not Disturb</div>
+              <div class="preview-msg">💬 Deep work — back at 3pm</div>
+            </div>
+          </div>
+          <div class="preview-card">
+            <div class="preview-loc remote">🏠 Remote</div>
+            <div class="preview-avatar" style="background:#038387">LO<div class="preview-pdot" style="background:#D29922"></div></div>
+            <div class="preview-info">
+              <div class="preview-name">Liam O'Brien</div>
+              <div class="preview-title">DevOps Engineer</div>
+              <div class="preview-upn">l.obrien@company.com</div>
+              <div class="preview-status" style="color:#D29922">⏱ Be Right Back</div>
+              <div class="preview-ooo">🏖 Out of office until Jan 6th</div>
+            </div>
+          </div>
+          <div class="preview-card">
+            <div class="preview-loc office">🏢 Office</div>
+            <div class="preview-avatar" style="background:#E36C09">TH<div class="preview-pdot" style="background:#F85149"></div></div>
+            <div class="preview-info">
+              <div class="preview-name">Tom Harrison</div>
+              <div class="preview-title">Account Director</div>
+              <div class="preview-upn">t.harrison@company.com</div>
+              <div class="preview-phone">📞 +1 604 555 0387</div>
+              <div class="preview-status" style="color:#F85149">📅 In a Meeting</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRODUCTS -->
+<section id="products">
+  <div class="reveal">
+    <div class="section-label">What we build</div>
+    <h2 class="section-title">Microsoft 365 tools<br>with a dynamic edge.</h2>
+  </div>
+  <div class="products-grid reveal">
+    <div class="product-card">
+      <div class="product-icon cyan">👥</div>
+      <div class="product-name">Teams Presence</div>
+      <div class="product-desc">Live presence directory for your whole organisation. Grouped by department, auto-refreshes every 60 seconds.</div>
+      <div class="product-features">
+        <div class="product-feature">Profile photos & job titles</div>
+        <div class="product-feature">In a Call / In a Meeting status</div>
+        <div class="product-feature">Remote vs Office location</div>
+        <div class="product-feature">Status messages & Out of Office</div>
+        <div class="product-feature">Deploys as a Teams tab app</div>
+      </div>
+    </div>
+    <div class="product-card">
+      <div class="product-icon green">📺</div>
+      <div class="product-name">TV Wallboard</div>
+      <div class="product-desc">Full-screen live presence display designed for office screens and reception TVs. Looks stunning on any display.</div>
+      <div class="product-features">
+        <div class="product-feature">Auto-rotates through departments</div>
+        <div class="product-feature">Live org-wide stats bar</div>
+        <div class="product-feature">Dark theme, readable at distance</div>
+        <div class="product-feature">Status message ticker</div>
+        <div class="product-feature">Zero-touch after setup</div>
+      </div>
+    </div>
+    <div class="product-card">
+      <div class="product-icon orange">📊</div>
+      <div class="product-name">Presence Analytics</div>
+      <div class="product-desc">Weekly and monthly reports on availability, peak hours, remote vs office trends and meeting load by department.</div>
+      <div class="product-features">
+        <div class="product-feature">Automated presence snapshots</div>
+        <div class="product-feature">Per-person availability reports</div>
+        <div class="product-feature">Department trend analysis</div>
+        <div class="product-feature">Power BI or web dashboard</div>
+        <div class="product-feature">Coming soon</div>
+      </div>
+    </div>
+    <div class="product-card">
+      <div class="product-icon purple">📊</div>
+      <div class="product-name">Power BI + Entra</div>
+      <div class="product-desc">Connect Microsoft Entra ID directly to Power BI for rich identity, access and directory reporting across your organisation.</div>
+      <div class="product-features">
+        <div class="product-feature">Entra ID user & group reports</div>
+        <div class="product-feature">Sign-in & audit log dashboards</div>
+        <div class="product-feature">Licence usage & cost analysis</div>
+        <div class="product-feature">Role & access visualisation</div>
+        <div class="product-feature">Scheduled auto-refresh</div>
+      </div>
+    </div>
+    <div class="product-card">
+      <div class="product-icon" style="background:rgba(255,107,53,0.1);border:1px solid rgba(255,107,53,0.2)">⚡</div>
+      <div class="product-name">Custom Development</div>
+      <div class="product-desc">Need something bespoke? We build custom Microsoft 365 integrations, Teams apps and Graph API solutions.</div>
+      <div class="product-features">
+        <div class="product-feature">Microsoft Graph API experts</div>
+        <div class="product-feature">Teams tab & bot development</div>
+        <div class="product-feature">Azure backend & hosting</div>
+        <div class="product-feature">Multi-tenant ready</div>
+        <div class="product-feature">Let's talk</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how">
+  <div class="reveal">
+    <div class="section-label">Simple setup</div>
+    <h2 class="section-title">Up and running<br>in under an hour.</h2>
+    <p class="section-sub">No complex infrastructure. No lengthy onboarding. Just your Microsoft 365 tenant and a few minutes.</p>
+  </div>
+  <div class="steps reveal">
+    <div class="step">
+      <div class="step-num">01</div>
+      <div class="step-title">Register Azure AD App</div>
+      <div class="step-desc">Create a free app registration in your Microsoft Entra tenant. Takes 5 minutes with our step-by-step guide.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">02</div>
+      <div class="step-title">Grant Permissions</div>
+      <div class="step-desc">Admin-consent three Graph API permissions. Presence, profiles and photos — nothing more, nothing less.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">03</div>
+      <div class="step-title">Upload to Teams</div>
+      <div class="step-desc">Upload the manifest zip to Teams Admin Center. One click to push it to everyone in your organisation.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">04</div>
+      <div class="step-title">Done</div>
+      <div class="step-desc">Everyone's presence is live. Plug the TV URL into your office screen and you're fully operational.</div>
+    </div>
+  </div>
+</section>
+
+<!-- TV DEMO -->
+<section id="tv-demo">
+  <div class="reveal">
+    <div class="section-label">TV Wallboard</div>
+    <h2 class="section-title">Your whole team.<br>On the wall.</h2>
+    <p class="section-sub">Designed to be read from across the room. Auto-rotates through departments, shows live stats and scrolls status messages.</p>
+    <div style="margin-top:32px">
+      <a href="#contact" class="btn-primary" style="display:inline-flex">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        See it live
+      </a>
+    </div>
+  </div>
+  <div class="tv-mockup reveal">
+    <div class="tv-top">
+      <div style="font-size:11px;font-weight:700;color:var(--cyan)">MultiHat Solutions</div>
+      <div style="display:flex;gap:16px">
+        <div class="tv-stat"><div class="tv-stat-num green">8</div><div class="tv-stat-label">Available</div></div>
+        <div class="tv-stat"><div class="tv-stat-num red">4</div><div class="tv-stat-label">In Calls</div></div>
+        <div class="tv-stat"><div class="tv-stat-num yellow">2</div><div class="tv-stat-label">Away</div></div>
+      </div>
+      <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--text)" id="tv-clock-demo">09:41</div>
+    </div>
+    <div class="tv-dept-title">Engineering · 6 people</div>
+    <div class="tv-cards">
+      <div class="tv-card"><div class="tv-av" style="background:#0078D4">SM<div class="tv-av-ring" style="border-color:#3FB950"></div></div><div class="tv-card-name">Sarah M.</div><div class="tv-card-status green">Available</div></div>
+      <div class="tv-card"><div class="tv-av" style="background:#C4314B">JT<div class="tv-av-ring" style="border-color:#F85149"></div></div><div class="tv-card-name">James T.</div><div class="tv-card-status red">📞 In a Call</div></div>
+      <div class="tv-card"><div class="tv-av" style="background:#107C41">PS<div class="tv-av-ring" style="border-color:#3FB950"></div></div><div class="tv-card-name">Priya S.</div><div class="tv-card-status green">Available</div></div>
+      <div class="tv-card"><div class="tv-av" style="background:#8764B8">CM<div class="tv-av-ring" style="border-color:#3FB950"></div></div><div class="tv-card-name">Carlos M.</div><div class="tv-card-status green">Available</div></div>
+      <div class="tv-card"><div class="tv-av" style="background:#038387">NK<div class="tv-av-ring" style="border-color:#F85149"></div></div><div class="tv-card-name">Nina K.</div><div class="tv-card-status red">📅 Meeting</div></div>
+      <div class="tv-card"><div class="tv-av" style="background:#E36C09">MJ<div class="tv-av-ring" style="border-color:#D29922"></div></div><div class="tv-card-name">Marcus J.</div><div class="tv-card-status" style="background:rgba(210,153,34,.15);color:#D29922">Away</div></div>
+    </div>
+    <div class="tv-progress"><div class="tv-progress-fill"></div></div>
+    <div class="tv-ticker">
+      <div class="tv-ticker-inner">💬 Sarah M: Working from home today &nbsp;·&nbsp; 🏖 Tom H: Out of office until Jan 3rd &nbsp;·&nbsp; 💬 Emma W: On client calls all afternoon &nbsp;·&nbsp; 💬 Sarah M: Working from home today &nbsp;·&nbsp; 🏖 Tom H: Out of office until Jan 3rd &nbsp;·&nbsp; 💬 Emma W: On client calls all afternoon</div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="contact-grid">
+    <div class="reveal">
+      <div class="section-label">Get in touch</div>
+      <h2 class="section-title">Ready to see it<br>in action?</h2>
+      <div class="contact-info">
+        <p>Book a live demo and we'll show you the full Teams Presence app and TV wallboard running against a real Microsoft 365 tenant.</p>
+        <div class="contact-detail"><div class="contact-detail-icon">🌐</div>swade.ca</div>
+        <div class="contact-detail"><div class="contact-detail-icon">📍</div>Canada · serving global clients</div>
+        <div class="contact-detail"><div class="contact-detail-icon">⚡</div>Typical response within 24 hours</div>
+      </div>
+    </div>
+    <div class="reveal">
+      <div class="contact-form" id="contact-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">First name</label>
+            <input class="form-input" type="text" placeholder="Wade" id="f-first">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Last name</label>
+            <input class="form-input" type="text" placeholder="Smith" id="f-last">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Work email</label>
+          <input class="form-input" type="email" placeholder="wade@company.com" id="f-email">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Company</label>
+          <input class="form-input" type="text" placeholder="Your company name" id="f-company">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Interested in</label>
+          <select class="form-select form-input" id="f-interest">
+            <option value="">Select a product…</option>
+            <option>Teams Presence App</option>
+            <option>TV Wallboard</option>
+            <option>Presence Analytics</option>
+            <option>Power BI + Entra Connector</option>
+            <option>Custom Development</option>
+            <option>Full suite</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Message (optional)</label>
+          <textarea class="form-textarea" placeholder="Tell us about your team size, any specific requirements…" id="f-message"></textarea>
+        </div>
+        <button class="btn-submit" onclick="submitForm()">Request Demo →</button>
+      </div>
+      <div class="form-success" id="form-success">
+        <div class="form-success-icon">✅</div>
+        <h3>You're on the list!</h3>
+        <p>Thanks for reaching out. We'll be in touch within 24 hours to arrange your demo.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">swade.ca</div>
+  <div class="footer-copy">© 2026 Swade.ca · Solutions with a Dynamic Edge · Built on Microsoft 365</div>
+</footer>
+
+<script>
+// Custom cursor
+const cursorDot=document.getElementById('cursor-dot');
+const cursorRing=document.getElementById('cursor-ring');
+let mouseX=0,mouseY=0,ringX=0,ringY=0;
+document.addEventListener('mousemove',e=>{
+  mouseX=e.clientX;mouseY=e.clientY;
+  cursorDot.style.left=mouseX+'px';cursorDot.style.top=mouseY+'px';
+});
+function animateCursor(){
+  ringX+=(mouseX-ringX)*.12;ringY+=(mouseY-ringY)*.12;
+  cursorRing.style.left=ringX+'px';cursorRing.style.top=ringY+'px';
+  requestAnimationFrame(animateCursor);
+}
+animateCursor();
+document.querySelectorAll('a,button,.product-card,.step').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{cursorDot.style.width='12px';cursorDot.style.height='12px';cursorRing.style.width='60px';cursorRing.style.height='60px';cursorRing.style.borderColor='rgba(0,229,255,1)';});
+  el.addEventListener('mouseleave',()=>{cursorDot.style.width='8px';cursorDot.style.height='8px';cursorRing.style.width='40px';cursorRing.style.height='40px';cursorRing.style.borderColor='rgba(0,229,255,0.6)';});
+});
+
+// Nav scroll
+window.addEventListener('scroll',()=>{
+  document.getElementById('nav').classList.toggle('scrolled',window.scrollY>50);
+});
+
+// Scroll reveal
+const observer=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');observer.unobserve(e.target);}});
+},{threshold:.15});
+document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+
+// TV demo clock
+function updateDemoClock(){
+  const el=document.getElementById('tv-clock-demo');
+  if(el)el.textContent=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+}
+setInterval(updateDemoClock,1000);updateDemoClock();
+
+// Form submit
+function submitForm(){
+  const first=document.getElementById('f-first').value.trim();
+  const email=document.getElementById('f-email').value.trim();
+  if(!first||!email){
+    alert('Please fill in your name and email.');return;
+  }
+  document.getElementById('contact-form').style.display='none';
+  document.getElementById('form-success').style.display='block';
+}
+</script>
+</body>
+</html>
